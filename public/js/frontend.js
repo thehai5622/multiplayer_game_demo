@@ -5,8 +5,10 @@ const socket = io()
 
 const scoreEl = document.querySelector('#scoreEl')
 
-canvas.width = innerWidth
-canvas.height = innerHeight
+const devicePixelRatio = window.devicePixelRatio || 1
+
+canvas.width = innerWidth * devicePixelRatio
+canvas.height = innerHeight * devicePixelRatio
 
 const x = canvas.width / 2
 const y = canvas.height / 2
@@ -22,7 +24,7 @@ socket.on('updatePlayers', (backEndPlayers) => {
         x: backEndPlayer.x,
         y: backEndPlayer.y,
         radius: 10,
-        color: 'hsl(0, 100%, 50%)'
+        color: backEndPlayer.color,
       })
     }
 
