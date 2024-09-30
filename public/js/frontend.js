@@ -26,6 +26,10 @@ socket.on('updatePlayers', (backEndPlayers) => {
         radius: 10,
         color: backEndPlayer.color,
       })
+    } else {
+      // if a player already exists
+      frontEndplayers[id].x = backEndPlayer.x
+      frontEndplayers[id].y = backEndPlayer.y
     }
 
     for (const id in frontEndplayers) {
@@ -50,3 +54,22 @@ function animate() {
 }
 
 animate()
+
+window.addEventListener('keydown', (event) => {
+  if (!frontEndplayers[socket.id]) return
+
+  switch (event.code) {
+    case 'KeyW':
+      socket.emit('keydown', 'KeyW')
+      break;
+    case 'KeyA':
+      socket.emit('keydown', 'KeyA')
+      break;
+    case 'KeyS':
+      socket.emit('keydown', 'KeyS')
+      break;
+    case 'KeyD':
+      socket.emit('keydown', 'KeyD')
+      break;
+  }
+})

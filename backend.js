@@ -22,7 +22,7 @@ io.on('connection', (socket) => {
   backEndPlayers[socket.id] = {
     x: 500 * Math.random(),
     y: 500 * Math.random(),
-    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+    color: `hsl(${Math.random() * 360}, 100%, 50%)`
   }
 
   io.emit('updatePlayers', backEndPlayers)
@@ -33,8 +33,29 @@ io.on('connection', (socket) => {
     io.emit('updatePlayers', backEndPlayers)
   })
 
+  socket.on('keydown', (keycode) => {
+    switch (keycode) {
+      case 'KeyW':
+        backEndPlayers[socket.id].y -= 5
+        break
+      case 'KeyA':
+        backEndPlayers[socket.id].x -= 5
+        break
+      case 'KeyS':
+        backEndPlayers[socket.id].y += 5
+        break
+      case 'KeyD':
+        backEndPlayers[socket.id].x += 5
+        break
+    }
+  })
+
   console.log(backEndPlayers)
 })
+
+setInterval(() => {
+  io.emit('updatePlayers', backEndPlayers)
+}, 1000 / 60)
 
 server.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
