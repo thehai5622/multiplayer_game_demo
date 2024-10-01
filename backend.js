@@ -22,7 +22,6 @@ const SPEED = 10
 let projectitiles = 0
 
 io.on('connection', (socket) => {
-  console.log('a user connected')
   backEndPlayers[socket.id] = {
     x: 500 * Math.random(),
     y: 500 * Math.random(),
@@ -31,6 +30,13 @@ io.on('connection', (socket) => {
   }
 
   io.emit('updatePlayers', backEndPlayers)
+
+  socket.on('initCanvas', ({ width, height }) => {
+    backEndPlayers[socket.id].canvas = {
+      width,
+      height
+    }
+  })
 
   socket.on('shoot', ({ x, y, angle }) => {
     projectitiles++
