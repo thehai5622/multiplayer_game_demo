@@ -1,5 +1,6 @@
 class Projectile {
-  constructor(x, y, radius, color, velocity) {
+
+  constructor({ x, y, radius, color, velocity }) {
     this.x = x
     this.y = y
     this.radius = radius
