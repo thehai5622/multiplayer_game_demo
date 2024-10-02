@@ -17,7 +17,11 @@ const frontEndplayers = {}
 const frontEndProjectiles = {}
 
 socket.on('connect', () => {
-  socket.emit('initCanvas', { width: canvas.width, height: canvas.height })
+  socket.emit('initCanvas', {
+    width: canvas.width,
+    height: canvas.height,
+    devicePixelRatio: devicePixelRatio,
+  })
 })
 
 socket.on('updateProjectiles', (backEndProjectiles) => {
