@@ -37,6 +37,12 @@ socket.on('updateProjectiles', (backEndProjectiles) => {
       frontEndProjectiles[id].y += backEndProjectile.velocity.y
     }
   }
+
+  for (const id in frontEndProjectiles) {
+    if (!backEndProjectiles[id]) {
+      delete frontEndProjectiles[id]
+    }
+  }
 })
 
 socket.on('updatePlayers', (backEndPlayers) => {
