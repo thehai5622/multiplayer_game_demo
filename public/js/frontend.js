@@ -20,7 +20,7 @@ socket.on('connect', () => {
   socket.emit('initCanvas', {
     width: canvas.width,
     height: canvas.height,
-    devicePixelRatio: devicePixelRatio,
+    devicePixelRatio: devicePixelRatio
   })
 })
 
@@ -60,6 +60,10 @@ socket.on('updatePlayers', (backEndPlayers) => {
         radius: 10,
         color: backEndPlayer.color
       })
+
+      document.querySelector(
+        '#playerLabels'
+      ).innerHTML += `<div data-id="${id}">${id}: 0</div>`
     } else {
       if (id === socket.id) {
         // if a player already exists
@@ -92,8 +96,10 @@ socket.on('updatePlayers', (backEndPlayers) => {
       }
     }
 
+    // this is where we delete frontend players
     for (const id in frontEndplayers) {
       if (!backEndPlayers[id]) {
+        const divToDelete = document.querySelector('#playerLabels')
         delete frontEndplayers[id]
       }
     }
