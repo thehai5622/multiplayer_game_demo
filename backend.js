@@ -24,27 +24,7 @@ const PROJECTILE_RADIUS = 5
 let projectitiles = 0
 
 io.on('connection', (socket) => {
-  backEndPlayers[socket.id] = {
-    x: 500 * Math.random(),
-    y: 500 * Math.random(),
-    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-    sequenceNumber: 0
-  }
-
   io.emit('updatePlayers', backEndPlayers)
-
-  socket.on('initCanvas', ({ width, height, devicePixelRatio }) => {
-    backEndPlayers[socket.id].canvas = {
-      width,
-      height
-    }
-
-    backEndPlayers[socket.id].radius = RADIUS
-
-    if (devicePixelRatio > 1) {
-      backEndPlayers[socket.id].radius = 2 * RADIUS
-    }
-  })
 
   socket.on('shoot', ({ x, y, angle }) => {
     projectitiles++
@@ -62,6 +42,29 @@ io.on('connection', (socket) => {
     }
 
     console.log(backEndProjectiles)
+  })
+
+  socket.on('initGame', ({ username, width, height, devicePixelRatio }) => {
+    backEndPlayers[socket.id] = {
+      x: 500 * Math.random(),
+      y: 500 * Math.random(),
+      color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+      sequenceNumber: 0,
+      score: 0,
+      username: username
+    }
+
+    // where we init our canvas
+    backEndPlayers[socket.id].canvas = {
+      width,
+      height
+    }
+
+    backEndPlayers[socket.id].radius = RADIUS
+
+    if (devicePixelRatio > 1) {
+      backEndPlayers[socket.id].radius = 2 * RADIUS
+    }
   })
 
   socket.on('disconnect', (reason) => {
@@ -116,10 +119,12 @@ setInterval(() => {
         backEndProjectiles[id]?.y - backEndPlayer.y
       )
 
+      // collision detection
       if (
         DISTANCE < PROJECTILE_RADIUS + backEndPlayer.radius &&
         backEndProjectiles[id]?.playerId !== playerId
       ) {
+        backEndPlayers[backEndProjectiles[id].playerId].score++
         delete backEndProjectiles[id]
         delete backEndPlayers[playerId]
         break
