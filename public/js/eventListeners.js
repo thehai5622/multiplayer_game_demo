@@ -1,12 +1,14 @@
 addEventListener('click', (event) => {
+  const canvas = document.querySelector('canvas')
+  const { top, left } = canvas.getBoundingClientRect()
   const playerPosition = {
     x: frontEndplayers[socket.id].x,
-    y: frontEndplayers[socket.id].y,
+    y: frontEndplayers[socket.id].y
   }
 
   const angle = Math.atan2(
-    (event.clientY * window.devicePixelRatio) - playerPosition.y,
-    (event.clientX * window.devicePixelRatio) - playerPosition.x
+    (event.clientY - top) - playerPosition.y,
+    (event.clientX - left) - playerPosition.x
   )
 
   // const velocity = {
@@ -30,5 +32,5 @@ addEventListener('click', (event) => {
   //   })
   // )
 
-  console.log(frontEndProjectiles);
+  console.log(frontEndProjectiles)
 })
