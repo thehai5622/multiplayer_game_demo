@@ -15,7 +15,7 @@ c.scale(devicePixelRatio, devicePixelRatio)
 const x = canvas.width / 2
 const y = canvas.height / 2
 
-const frontEndplayers = {}
+const frontEndPlayers = {}
 const frontEndProjectiles = {}
 
 socket.on('updateProjectiles', (backEndProjectiles) => {
@@ -27,7 +27,7 @@ socket.on('updateProjectiles', (backEndProjectiles) => {
         x: backEndProjectile.x,
         y: backEndProjectile.y,
         radius: 5,
-        color: frontEndplayers[backEndProjectile.playerId]?.color,
+        color: frontEndPlayers[backEndProjectile.playerId]?.color,
         velocity: backEndProjectile.velocity
       })
     } else {
@@ -47,8 +47,8 @@ socket.on('updatePlayers', (backEndPlayers) => {
   for (const id in backEndPlayers) {
     const backEndPlayer = backEndPlayers[id]
 
-    if (!frontEndplayers[id]) {
-      frontEndplayers[id] = new Player({
+    if (!frontEndPlayers[id]) {
+      frontEndPlayers[id] = new Player({
         x: backEndPlayer.x,
         y: backEndPlayer.y,
         radius: 10,
@@ -93,10 +93,15 @@ socket.on('updatePlayers', (backEndPlayers) => {
         parentDiv.appendChild(childDiv)
       })
 
+      frontEndPlayers[id].target = {
+        x: backEndPlayer.x,
+        y: backEndPlayer.y
+      }
+
       if (id === socket.id) {
         // if a player already exists
-        frontEndplayers[id].x = backEndPlayer.x
-        frontEndplayers[id].y = backEndPlayer.y
+        frontEndPlayers[id].x = backEndPlayer.x
+        frontEndPlayers[id].y = backEndPlayer.y
 
         const lastBackEndInputIndex = playerInputs.findIndex((input) => {
           return backEndPlayer.sequenceNumber === input.sequenceNumber
@@ -107,25 +112,14 @@ socket.on('updatePlayers', (backEndPlayers) => {
         }
 
         playerInputs.forEach((input) => {
-          frontEndplayers[id].x += input.dx
-          frontEndplayers[id].y += input.dy
-        })
-      } else {
-        // for all other players
-        frontEndplayers[id].x = backEndPlayer.x
-        frontEndplayers[id].y = backEndPlayer.y
-
-        gsap.to(frontEndplayers[id], {
-          x: backEndPlayer.x,
-          y: backEndPlayer.y,
-          duration: 0.015,
-          ease: 'linear'
+          frontEndPlayers[id].target.x += input.dx
+          frontEndPlayers[id].target.y += input.dy
         })
       }
     }
 
     // this is where we delete frontend players
-    for (const id in frontEndplayers) {
+    for (const id in frontEndPlayers) {
       if (!backEndPlayers[id]) {
         const divToDelete = document.querySelector(`div[data-id="${id}"]`)
         divToDelete.parentNode.removeChild(divToDelete)
@@ -134,7 +128,7 @@ socket.on('updatePlayers', (backEndPlayers) => {
           document.querySelector('#usernameForm').style.display = 'block'
         }
 
-        delete frontEndplayers[id]
+        delete frontEndPlayers[id]
       }
     }
   }
@@ -147,8 +141,17 @@ function animate() {
   // c.fillStyle = 'rgba(0, 0, 0, 0.1)'
   c.clearRect(0, 0, canvas.width, canvas.height)
 
-  for (const id in frontEndplayers) {
-    const frontEndPlayer = frontEndplayers[id]
+  for (const id in frontEndPlayers) {
+    const frontEndPlayer = frontEndPlayers[id]
+
+    // linear interpolation
+    if (frontEndPlayer.target) {
+      frontEndPlayers[id].x +=
+        (frontEndPlayer.target.x - frontEndPlayers[id].x) * 0.5
+      frontEndPlayers[id].y +=
+        (frontEndPlayer.target.y - frontEndPlayers[id].y) * 0.5
+    }
+
     frontEndPlayer.draw()
   }
 
@@ -182,31 +185,31 @@ setInterval(() => {
   if (keys.w.pressed) {
     sequenceNumber++
     playerInputs.push({ sequenceNumber: sequenceNumber, dx: 0, dy: -SPEED })
-    frontEndplayers[socket.id].y -= SPEED
+    frontEndPlayers[socket.id].y -= SPEED
     socket.emit('keydown', { keycode: 'KeyW', sequenceNumber: sequenceNumber })
   }
   if (keys.a.pressed) {
     sequenceNumber++
     playerInputs.push({ sequenceNumber: sequenceNumber, dx: -SPEED, dy: 0 })
-    frontEndplayers[socket.id].x -= SPEED
+    frontEndPlayers[socket.id].x -= SPEED
     socket.emit('keydown', { keycode: 'KeyA', sequenceNumber: sequenceNumber })
   }
   if (keys.s.pressed) {
     sequenceNumber++
     playerInputs.push({ sequenceNumber: sequenceNumber, dx: 0, dy: +SPEED })
-    frontEndplayers[socket.id].y += SPEED
+    frontEndPlayers[socket.id].y += SPEED
     socket.emit('keydown', { keycode: 'KeyS', sequenceNumber: sequenceNumber })
   }
   if (keys.d.pressed) {
     sequenceNumber++
     playerInputs.push({ sequenceNumber: sequenceNumber, dx: +SPEED, dy: 0 })
-    frontEndplayers[socket.id].x += SPEED
+    frontEndPlayers[socket.id].x += SPEED
     socket.emit('keydown', { keycode: 'KeyD', sequenceNumber: sequenceNumber })
   }
 }, 15)
 
 window.addEventListener('keydown', (event) => {
-  if (!frontEndplayers[socket.id]) return
+  if (!frontEndPlayers[socket.id]) return
 
   switch (event.code) {
     case 'KeyW':
@@ -225,7 +228,7 @@ window.addEventListener('keydown', (event) => {
 })
 
 window.addEventListener('keyup', (event) => {
-  if (!frontEndplayers[socket.id]) return
+  if (!frontEndPlayers[socket.id]) return
 
   switch (event.code) {
     case 'KeyW':
